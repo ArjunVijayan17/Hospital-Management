@@ -26,7 +26,7 @@ const Login = () => {
         const { token, user } = res.data;
         localStorage.setItem('chims_token', token);
         localStorage.setItem('chims_user', JSON.stringify(user));
-        navigate('/portal/home');
+        navigate('/portal/appointments');
       } else {
         // Login flow
         const payloadRole = roleGroup === 'patient' ? 'patient' : 'superAdmin'; 
@@ -40,7 +40,7 @@ const Login = () => {
         localStorage.setItem('chims_user', JSON.stringify(user));
 
         if (user.role === 'patient') {
-          navigate('/portal/home');
+          navigate('/portal/appointments');
         } else {
           navigate('/admin/dashboard');
         }

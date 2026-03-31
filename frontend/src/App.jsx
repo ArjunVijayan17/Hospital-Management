@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import AdminLayout from './components/AdminLayout';
+import PatientLayout from './components/PatientLayout';
 import Dashboard from './pages/Dashboard';
 import Patients from './pages/Patients';
 import Doctors from './pages/Doctors';
@@ -9,7 +10,12 @@ import Prescriptions from './pages/Prescriptions';
 import Pharmacy from './pages/Pharmacy';
 import Trials from './pages/Trials';
 import Billing from './pages/Billing';
-import PortalHome from './pages/PortalHome';
+
+// Portal Pages
+import PortalAppointments from './pages/PortalAppointments';
+import PortalMedicines from './pages/PortalMedicines';
+import PortalTests from './pages/PortalTests';
+import PortalBills from './pages/PortalBills';
 
 function App() {
   return (
@@ -30,8 +36,14 @@ function App() {
           <Route path="billing" element={<Billing />} />
         </Route>
 
-        {/* User Portal Routes */}
-        <Route path="/portal/home" element={<PortalHome />} />
+        {/* User Portal Routes with Sidebar Layout */}
+        <Route path="/portal" element={<PatientLayout />}>
+          <Route index element={<Navigate to="appointments" replace />} />
+          <Route path="appointments" element={<PortalAppointments />} />
+          <Route path="medicines" element={<PortalMedicines />} />
+          <Route path="tests" element={<PortalTests />} />
+          <Route path="bills" element={<PortalBills />} />
+        </Route>
       </Routes>
     </div>
   );

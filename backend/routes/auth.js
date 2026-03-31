@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const Patient = require('../models/Patient');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -37,11 +38,24 @@ router.post('/register', async (req, res) => {
       isActive: true
     });
 
+    // If role is patient, automatically create a Patient record
+    let newPatient = null;
+    if (assignedRole === 'patient') {
+        newPatient = new Patient({
+            name,
+            email,
+            userId: newUser._id
+        });
+        await newPatient.save();
+        newUser.patientId = newPatient._id;
+    }
+
     await newUser.save();
 
     // Create JWT
     const payload = {
       userId: newUser._id,
+      patientId: newUser.patientId,
       name: newUser.name,
       email: newUser.email,
       role: newUser.role
@@ -90,9 +104,30 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ message: 'Account has been deactivated' });
     }
 
+    // If patient but missing patientId, try to find it or create it
+    let finalPatientId = user.patientId;
+    if (user.role === 'patient' && !finalPatientId) {
+        let foundPatient = await Patient.findOne({ email: user.email }) || await Patient.findOne({ userId: user._id });
+        
+        if (!foundPatient) {
+            // Auto-create missing patient record for legacy accounts
+            foundPatient = new Patient({
+                name: user.name,
+                email: user.email,
+                userId: user._id
+            });
+            await foundPatient.save();
+        }
+        
+        finalPatientId = foundPatient._id;
+        user.patientId = finalPatientId;
+        await user.save();
+    }
+
     // Create JWT
     const payload = {
       userId: user._id,
+      patientId: finalPatientId,
       name: user.name,
       email: user.email,
       role: user.role
